@@ -772,8 +772,20 @@ def run_custom_eval(
     else:
         index_data = {"evaluations": []}
     
-    # Add this evaluation to the index
-    index_data["evaluations"].append(metadata)
+    # Add this evaluation to the index, but only include necessary fields
+    # Instead of appending the entire metadata object
+    index_entry = {
+        "id": date_str,
+        "timestamp": metadata["timestamp"],
+        "model": model_name,
+        "dataset": metadata["dataset"],
+        "n_examples": metadata["n_examples"],
+        "n_repeats": metadata["n_repeats"],
+        "score": metadata["score"],
+        "temperature": metadata["temperature"]
+    }
+    index_data["evaluations"].append(index_entry)
+    
     # Sort by timestamp (most recent first)
     index_data["evaluations"] = sorted(
         index_data["evaluations"], 
@@ -781,6 +793,23 @@ def run_custom_eval(
         reverse=True
     )
     master_index_path.write_text(json.dumps(index_data, indent=2))
+
+    # Also append this evaluation's metadata to the root-level grade.json file
+    grade_json_path = Path("grade.json")
+    try:
+        if grade_json_path.exists():
+            with grade_json_path.open("r") as f:
+                grade_data = json.load(f)
+                # Ensure grade_data is a list; if not, wrap it in one
+                if not isinstance(grade_data, list):
+                    grade_data = [grade_data]
+        else:
+            grade_data = []
+    except json.JSONDecodeError:
+        # Malformed file – start fresh to avoid crashing the eval run
+        grade_data = []
+    grade_data.append(metadata)
+    grade_json_path.write_text(json.dumps(grade_data, indent=2))
 
     print(f"\nOverall score: {result.score}")
     print(f"Theme-category pairs found: {len(theme_category_avg_scores)}")

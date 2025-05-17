@@ -4,6 +4,154 @@
 
 {% block head %}
 <style>
+    :root {
+        --dark-bg: #121212;
+        --dark-surface: #1e1e1e;
+        --dark-surface-lighter: #2d2d2d;
+        --dark-text: #e0e0e0;
+        --dark-text-secondary: #aaaaaa;
+        --dark-border: #444444;
+        --dark-primary: #bb86fc;
+        --dark-secondary: #03dac6;
+        --dark-danger: #cf6679;
+        --dark-warning: #ffb74d;
+        --dark-success: #81c784;
+        --dark-info: #64b5f6;
+    }
+
+    body {
+        background-color: var(--dark-bg);
+        color: var(--dark-text);
+    }
+
+    .card {
+        background-color: var(--dark-surface);
+        border-color: var(--dark-border);
+    }
+
+    .card-title {
+        color: var(--dark-text);
+    }
+
+    .table {
+        color: var(--dark-text);
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: var(--dark-surface-lighter);
+    }
+
+    .table th {
+        border-color: var(--dark-border);
+    }
+
+    .table td {
+        border-color: var(--dark-border);
+    }
+
+    .btn-outline-primary {
+        color: var(--dark-primary);
+        border-color: var(--dark-primary);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--dark-primary);
+        color: var(--dark-bg);
+    }
+
+    .btn-outline-secondary {
+        color: var(--dark-secondary);
+        border-color: var(--dark-secondary);
+    }
+
+    .btn-primary {
+        background-color: var(--dark-primary);
+        border-color: var(--dark-primary);
+    }
+
+    .btn-secondary {
+        background-color: var(--dark-surface-lighter);
+        border-color: var(--dark-border);
+    }
+
+    .nav-pills .nav-link {
+        color: var(--dark-text);
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: var(--dark-primary);
+    }
+
+    .alert-info {
+        background-color: rgba(100, 181, 246, 0.2);
+        color: var(--dark-text);
+        border-color: rgba(100, 181, 246, 0.4);
+    }
+
+    .alert-warning {
+        background-color: rgba(255, 183, 77, 0.2);
+        color: var(--dark-text);
+        border-color: rgba(255, 183, 77, 0.4);
+    }
+
+    .badge.bg-success {
+        background-color: var(--dark-success) !important;
+    }
+
+    .badge.bg-warning {
+        background-color: var(--dark-warning) !important;
+        color: #000;
+    }
+
+    .badge.bg-danger {
+        background-color: var(--dark-danger) !important;
+    }
+
+    .badge.bg-secondary {
+        background-color: var(--dark-surface-lighter) !important;
+    }
+
+    .modal-content {
+        background-color: var(--dark-surface);
+        border-color: var(--dark-border);
+    }
+
+    .modal-header {
+        border-bottom-color: var(--dark-border);
+    }
+
+    .modal-footer {
+        border-top-color: var(--dark-border);
+    }
+
+    .list-group-item {
+        background-color: var(--dark-surface-lighter);
+        border-color: var(--dark-border);
+        color: var(--dark-text);
+    }
+
+    pre {
+        background-color: var(--dark-surface-lighter);
+        color: var(--dark-text);
+        padding: 10px;
+        border-radius: 4px;
+    }
+
+    .conversation-container .message {
+        margin-bottom: 10px;
+        padding: 8px;
+        border-radius: 5px;
+    }
+
+    .conversation-container .message.user {
+        background-color: rgba(187, 134, 252, 0.1);
+    }
+
+    .conversation-container .message.assistant {
+        background-color: rgba(3, 218, 198, 0.1);
+    }
+
+    /* Original styles preserved */
     .comparison-table th, .comparison-table td {
         text-align: center;
     }
@@ -456,6 +604,29 @@
 {% if evaluations|length >= 2 %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Chart color sets for dark mode
+        const colorSets = {
+            success: {
+                bg: 'rgba(129, 199, 132, 0.7)',
+                border: 'rgb(129, 199, 132)'
+            },
+            warning: {
+                bg: 'rgba(255, 183, 77, 0.7)',
+                border: 'rgb(255, 183, 77)'
+            },
+            danger: {
+                bg: 'rgba(207, 102, 121, 0.7)',
+                border: 'rgb(207, 102, 121)'
+            }
+        };
+
+        // Helper function to get color based on score
+        function getColorByScore(score) {
+            if (score >= 0.8) return colorSets.success;
+            if (score >= 0.6) return colorSets.warning;
+            return colorSets.danger;
+        }
+
         // Overall score chart
         const ctxOverall = document.getElementById('overallScoreChart').getContext('2d');
         
@@ -468,12 +639,12 @@
                     data: [{% for eval in evaluations %}{{ eval.score }},{% endfor %}],
                     backgroundColor: [
                         {% for eval in evaluations %}
-                        '{{ "rgba(40, 167, 69, 0.7)" if eval.score >= 0.8 else "rgba(255, 193, 7, 0.7)" if eval.score >= 0.6 else "rgba(220, 53, 69, 0.7)" }}',
+                        '{{ "rgba(129, 199, 132, 0.7)" if eval.score >= 0.8 else "rgba(255, 183, 77, 0.7)" if eval.score >= 0.6 else "rgba(207, 102, 121, 0.7)" }}',
                         {% endfor %}
                     ],
                     borderColor: [
                         {% for eval in evaluations %}
-                        '{{ "rgb(40, 167, 69)" if eval.score >= 0.8 else "rgb(255, 193, 7)" if eval.score >= 0.6 else "rgb(220, 53, 69)" }}',
+                        '{{ "rgb(129, 199, 132)" if eval.score >= 0.8 else "rgb(255, 183, 77)" if eval.score >= 0.6 else "rgb(207, 102, 121)" }}',
                         {% endfor %}
                     ],
                     borderWidth: 1
@@ -488,7 +659,29 @@
                         max: 1,
                         title: {
                             display: true,
-                            text: 'Score'
+                            text: 'Score',
+                            color: '#e0e0e0'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#aaaaaa'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#aaaaaa'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#e0e0e0'
                         }
                     }
                 }
@@ -503,6 +696,7 @@
             
             const datasets = [];
             {% for eval in evaluations %}
+            const evalColor = getColorByScore({{ eval.score }});
             datasets.push({
                 label: '{{ eval.model }}',
                 data: allCategories.map(category => {
@@ -510,8 +704,8 @@
                            ? {{ eval.category_scores|default({})|tojson }}[category] 
                            : null;
                 }),
-                backgroundColor: '{{ "rgba(40, 167, 69, 0.7)" if eval.score >= 0.8 else "rgba(255, 193, 7, 0.7)" if eval.score >= 0.6 else "rgba(220, 53, 69, 0.7)" }}',
-                borderColor: '{{ "rgb(40, 167, 69)" if eval.score >= 0.8 else "rgb(255, 193, 7)" if eval.score >= 0.6 else "rgb(220, 53, 69)" }}',
+                backgroundColor: evalColor.bg,
+                borderColor: evalColor.border,
                 borderWidth: 1
             });
             {% endfor %}
@@ -531,7 +725,24 @@
                             max: 1,
                             min: 0,
                             ticks: {
-                                stepSize: 0.2
+                                stepSize: 0.2,
+                                color: '#aaaaaa'
+                            },
+                            pointLabels: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0e0e0'
                             }
                         }
                     }
@@ -547,6 +758,7 @@
             
             const themeDatasets = [];
             {% for eval in evaluations %}
+            const themeEvalColor = getColorByScore({{ eval.score }});
             themeDatasets.push({
                 label: '{{ eval.model }}',
                 data: allThemeCategories.map(theme_cat => {
@@ -554,8 +766,8 @@
                            ? {{ eval.theme_category_scores|default({})|tojson }}[theme_cat] 
                            : null;
                 }),
-                backgroundColor: '{{ "rgba(40, 167, 69, 0.7)" if eval.score >= 0.8 else "rgba(255, 193, 7, 0.7)" if eval.score >= 0.6 else "rgba(220, 53, 69, 0.7)" }}',
-                borderColor: '{{ "rgb(40, 167, 69)" if eval.score >= 0.8 else "rgb(255, 193, 7)" if eval.score >= 0.6 else "rgb(220, 53, 69)" }}',
+                backgroundColor: themeEvalColor.bg,
+                borderColor: themeEvalColor.border,
                 borderWidth: 1,
                 fill: false
             });
@@ -576,14 +788,32 @@
                             max: 1,
                             title: {
                                 display: true,
-                                text: 'Score'
+                                text: 'Score',
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#aaaaaa'
                             }
                         },
                         x: {
                             ticks: {
                                 autoSkip: false,
                                 maxRotation: 90,
-                                minRotation: 45
+                                minRotation: 45,
+                                color: '#aaaaaa'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0e0e0'
                             }
                         }
                     }
@@ -607,6 +837,7 @@
             
             // Create datasets for each evaluation
             {% for eval in evaluations %}
+            const exampleEvalColor = getColorByScore({{ eval.score }});
             exampleDatasets.push({
                 label: '{{ eval.model }}',
                 data: Array(maxExamples).fill(null).map((_, i) => {
@@ -615,8 +846,8 @@
                     }
                     return null;
                 }),
-                backgroundColor: '{{ "rgba(40, 167, 69, 0.7)" if eval.score >= 0.8 else "rgba(255, 193, 7, 0.7)" if eval.score >= 0.6 else "rgba(220, 53, 69, 0.7)" }}',
-                borderColor: '{{ "rgb(40, 167, 69)" if eval.score >= 0.8 else "rgb(255, 193, 7)" if eval.score >= 0.6 else "rgb(220, 53, 69)" }}',
+                backgroundColor: exampleEvalColor.bg,
+                borderColor: exampleEvalColor.border,
                 borderWidth: 1
             });
             {% endfor %}
@@ -636,16 +867,32 @@
                             max: 1,
                             title: {
                                 display: true,
-                                text: 'Score'
+                                text: 'Score',
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#aaaaaa'
                             }
                         },
                         x: {
                             ticks: {
-                                autoSkip: true
+                                autoSkip: true,
+                                color: '#aaaaaa'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
                             }
                         }
                     },
                     plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0e0e0'
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -667,6 +914,7 @@
                 
                 const tagDatasets = [];
                 {% for eval in evaluations %}
+                const tagEvalColor = getColorByScore({{ eval.score }});
                 tagDatasets.push({
                     label: '{{ eval.model }}',
                     data: groupTags.map(tag => {
@@ -675,8 +923,8 @@
                                ? {{ eval.grouped_rubric_tag_scores|default({})|tojson }}['{{ group }}'][tag] 
                                : null;
                     }),
-                    backgroundColor: '{{ "rgba(40, 167, 69, 0.7)" if eval.score >= 0.8 else "rgba(255, 193, 7, 0.7)" if eval.score >= 0.6 else "rgba(220, 53, 69, 0.7)" }}',
-                    borderColor: '{{ "rgb(40, 167, 69)" if eval.score >= 0.8 else "rgb(255, 193, 7)" if eval.score >= 0.6 else "rgb(220, 53, 69)" }}',
+                    backgroundColor: tagEvalColor.bg,
+                    borderColor: tagEvalColor.border,
                     borderWidth: 1,
                     fill: false
                 });
@@ -697,14 +945,32 @@
                                 max: 1,
                                 title: {
                                     display: true,
-                                    text: 'Score'
+                                    text: 'Score',
+                                    color: '#e0e0e0'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#aaaaaa'
                                 }
                             },
                             x: {
                                 ticks: {
                                     autoSkip: false,
                                     maxRotation: 90,
-                                    minRotation: 45
+                                    minRotation: 45,
+                                    color: '#aaaaaa'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e0e0e0'
                                 }
                             }
                         }

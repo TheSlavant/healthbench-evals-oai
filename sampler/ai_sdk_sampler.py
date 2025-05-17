@@ -21,13 +21,30 @@ class AISDKSampler(SamplerBase):
         system_message: str | None = None,
         temperature: float = 1,
         max_tokens: int = 1024,
-        api_url: str = "http://localhost:3000/api/chat-buffer",
+        api_url: str = "http://localhost:3000/api/sample",
+        prompt: str | None = None,
     ):
+        """Create a sampler that talks to a Vercel AI SDK-powered endpoint.
+
+        Parameters
+        ----------
+        prompt : str | None
+            Optional free-form text that will be forwarded to the backend as the
+            ``prompt`` field of the JSON payload. This lets callers supply a
+            custom system/developer prompt without modifying the message list.
+        """
         self.api_url = api_url
         self.model = model
         self.system_message = system_message
         self.temperature = temperature
         self.max_tokens = max_tokens
+        
+        # Check environment variable for prompt if not provided directly
+        if prompt is None and "AI_SDK_PROMPT" in os.environ:
+            self.prompt = os.environ.get("AI_SDK_PROMPT")
+        else:
+            self.prompt = prompt
+            
         self.image_format = "url"
 
     def _handle_image(
@@ -88,6 +105,10 @@ class AISDKSampler(SamplerBase):
             "maxTokens": self.max_tokens,
         }
         
+        # Forward optional prompt if provided
+        if self.prompt is not None:
+            payload["prompt"] = self.prompt
+        
         trial = 0
         while True:
             try:
@@ -116,7 +137,7 @@ class AISDKSampler(SamplerBase):
                             elif item.get("type") == "actualModel":
                                 actual_model = item.get("value")
                 
-                print(f"auto_selected_model: {auto_selected_model}")
+                # print(f"auto_selected_model: {auto_selected_model}")
                 
                 # Get usage data and format it to match expected structure
                 usage_data = response_data.get("metadata", {}).get("usage")
@@ -130,7 +151,7 @@ class AISDKSampler(SamplerBase):
                 }
                 
                 return SamplerResponse(
-                    response_text=response_data.get("content", ""),
+                    response_text=response_data.get("text", ""),
                     response_metadata=response_metadata,
                     actual_queried_message_list=message_list,
                 )

@@ -22,7 +22,7 @@ class SimulateSampler(SamplerBase):
         system_message: str | None = None,
         temperature: float = 1,
         max_tokens: int = 1024,
-        api_url: str = "http://localhost:3000/api/chat-buffer",
+        api_url: str = "http://localhost:3000/api/sample",
     ):
         self.api_url = api_url
         self.model = model
